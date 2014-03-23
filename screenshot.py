@@ -39,7 +39,7 @@ def printv(text):
     if args.verbose and not args.quiet:
         print "[v]\t"+text
 def writev(text):
-    if args.verbose:
+    if args.verbose and not args.quiet:
         sys.stdout.write(text)
         sys.stdout.flush()
 def prints(text):
