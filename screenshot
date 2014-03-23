@@ -30,6 +30,7 @@ parser.add_argument("-d","--delay",type=int,help="Wait <delay> seconds before ta
 parser.add_argument("-f","--filename",help="Specify a filename (default is a timestamp)")
 parser.add_argument("-c","--clean",action="store_true",help="Delete screenshot after upload (default false)")
 parser.add_argument("-q","--quiet",action="store_true",help="No output except the link")
+parser.add_argument("-s","--select",action="store_true",help="Select a sub area of the screen")
 parser.add_argument("-v","--verbose",action="store_true",help="Display additional progress information")
 parser.add_argument("-l","--clipboard",action="store_true",help="Copy imgur link to clipboard (requires xclip)")
 args = parser.parse_args()
@@ -62,12 +63,10 @@ def takeScreenshot():
                 writev(str(d)+"... ")
                 time.sleep(1)
                 d -= 1
-        if args.filename:
-            FILENAME = args.filename
-            command += FILENAME
-        else:
-            FILENAME = time.strftime("%Y.%m.%d.%H.%M.%S.png",time.localtime())
-            command += FILENAME            
+        if args.select:
+            command += "-s "
+        FILENAME = args.filename if args.filename else time.strftime("%Y.%m.%d.%H.%M.%S.png",time.localtime())
+        command += FILENAME
         resp = os.system(command)
 	FILENAME = "%s/%s" % (os.getcwd(),FILENAME)
         if resp:
@@ -92,6 +91,9 @@ def uploadScreenshot(screenshot):
     req = urllib2.Request(UPLOADURL,data)
     req.add_header('Authorization', 'Client-ID ' + CID)
     resp = urllib2.urlopen(req)
+    if int(resp.info()["X-RateLimit-ClientRemaining"])< 1:                                          #Haven't actually gotten here so not 100% sure it will work. If someone gets
+        printe("You have run out of credits!")                                                      #to this point and it fails please leave a bug report on github
+
     try:
         jdat = json.loads(resp.read())
         if "data" in jdat and "link" in jdat["data"]:
