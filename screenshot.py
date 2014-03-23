@@ -5,7 +5,6 @@ import sys
 import time
 import json
 import argparse
-import subprocess
 import urllib
 import urllib2
 
@@ -50,8 +49,7 @@ def printe(text):
     sys.exit(-1)
 def takeScreenshot():
     printv("Checking if scrot is installed...")
-    resp = subprocess.check_output(["scrot","-v"], stderr=subprocess.PIPE).strip()
-    if not re.search(r"^scrot version \d+\.\d+",resp):
+    if not os.path.isfile("/usr/bin/scrot"):
         printe("Error: scrot not installed (command scrot -v failed)")
     else:
         printv("Success: scrot is installed!")
@@ -100,16 +98,14 @@ def uploadScreenshot(screenshot):
             prints("Successfully uploaded image!")
             if args.clipboard:
                 printv("Checking if xclip is installed...")
-                try:
-                    subprocess.check_output(["xclip","-version"], stderr=subprocess.PIPE)
-                except:
-                    printv("Error: xclip is not installed!")
-                    printv("Printing link to console...")
-                    print "Link: "+jdat["data"]["link"]
-                else:
+		if os.path.isfile("/usr/bin/xclip"):
                     printv("Success: xclip is installed!")
                     os.system("echo %s | xclip -selection c" % jdat["data"]["link"])
                     prints("The link has been copied to your clipboard")
+		else:
+                    printv("Error: xclip is not installed!")
+                    printv("Printing link to console...")
+                    print "Link: "+jdat["data"]["link"]
             else:
                 print "Link: "+jdat["data"]["link"]
     except Exception, e:
