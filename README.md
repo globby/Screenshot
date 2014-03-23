@@ -32,7 +32,8 @@ Enter this ID into the `screenshot.py` script:
 `python screenshot.py -h`
 
 <pre>
-usage: screenshot.py [-h] [-i ID] [-d DELAY] [-f FILENAME] [-c] [-q] [-v] [-l]
+usage: screenshot.py [-h] [-i ID] [-d DELAY] [-f FILENAME] [-c] [-q] [-s] [-v]
+                     [-l]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -43,6 +44,7 @@ optional arguments:
                         Specify a filename (default is a timestamp)
   -c, --clean           Delete screenshot after upload (default false)
   -q, --quiet           No output except the link
+  -s, --select          Select a sub area of the screen
   -v, --verbose         Display additional progress information
   -l, --clipboard       Copy imgur link to clipboard (requires xclip)
   </pre>
