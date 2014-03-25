@@ -33,7 +33,7 @@ Enter this ID into the `screenshot.py` script:
 
 <pre>
 usage: screenshot.py [-h] [-i ID] [-d DELAY] [-f FILENAME] [-c] [-q] [-s] [-v]
-                     [-l]
+                     [-l] [-m IMAGE]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -47,4 +47,6 @@ optional arguments:
   -s, --select          Select a sub area of the screen
   -v, --verbose         Display additional progress information
   -l, --clipboard       Copy imgur link to clipboard (requires xclip)
+  -m IMAGE, --image IMAGE
+                        Upload an existing image
   </pre>
