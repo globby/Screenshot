@@ -60,6 +60,10 @@ parser.add_argument(
     "--clipboard",
     action="store_true",
     help="Copy imgur link to clipboard (requires xclip)")
+parser.add_argument(
+    "-m",
+    "--image",
+    help="Upload an existing image")
 args = parser.parse_args()
 
 
@@ -135,7 +139,9 @@ def uploadScreenshot(screenshot):
 
     # Haven't actually gotten here so not 100% sure it will work. If someone
     # gets to this point and it fails please leave a bug report on github
-    if int(resp.info()["X-RateLimit-ClientRemaining"]) < 1:
+    credits = int(resp.info()["X-RateLimit-ClientRemaining"])
+    printv("Credits remaining: "+str(credits))
+    if credits < 1:
         printe("You have run out of credits!")
 
     try:
@@ -160,4 +166,16 @@ def uploadScreenshot(screenshot):
         printv(str(e))
         printe("Error: Couldn't upload image")
 if __name__ == "__main__":
-    uploadScreenshot(takeScreenshot())
+    if args.image:
+        if os.path.exists(args.image):
+            try:
+                with open(args.image,"rb") as f:
+                    data = f.read()
+            except IOError:
+                printe("Error: Couldn't open file")
+            else:
+                uploadScreenshot(data)
+        else:
+            printe("Error: File doesn't exist")
+    else:
+        uploadScreenshot(takeScreenshot())
