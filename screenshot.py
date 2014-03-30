@@ -1,12 +1,18 @@
-#!/usr/bin/env python2
-import re
+#!/usr/bin/env python
 import os
 import sys
 import time
 import json
 import argparse
-import urllib
-import urllib2
+
+try:  # py2
+    from urllib2 import Request, urlopen
+    from urllib import urlencode
+except ImportError:  # py3
+    from urllib.request import Request, urlopen
+    from urllib.parse import urlencode
+
+PY3 = sys.version_info[0] == 3
 
 ID = "c01d446d57b2073"
 
@@ -69,7 +75,7 @@ args = parser.parse_args()
 
 def printv(text):
     if args.verbose and not args.quiet:
-        print "[v]\t" + text
+        print("[v]\t" + text)
 
 
 def writev(text):
@@ -80,11 +86,11 @@ def writev(text):
 
 def prints(text):
     if not args.quiet:
-        print "[+]\t" + text
+        print("[+]\t" + text)
 
 
 def printe(text):
-    print "[-]\t" + text
+    print("[-]\t" + text)
     sys.exit(-1)
 
 
@@ -132,20 +138,29 @@ def uploadScreenshot(screenshot):
     else:
         CID = ID
     prints("Starting image upload...")
-    data = urllib.urlencode({"image": screenshot, "type": "file"})
-    req = urllib2.Request(UPLOADURL, data)
+    data = urlencode({"image": screenshot, "type": "file"})
+
+    if PY3:
+        req = Request(UPLOADURL, data.encode('ascii'))
+    else:
+        req = Request(UPLOADURL, data)
+
     req.add_header('Authorization', 'Client-ID ' + CID)
-    resp = urllib2.urlopen(req)
+    resp = urlopen(req)
 
     # Haven't actually gotten here so not 100% sure it will work. If someone
     # gets to this point and it fails please leave a bug report on github
     credits = int(resp.info()["X-RateLimit-ClientRemaining"])
-    printv("Credits remaining: "+str(credits))
+    printv("Credits remaining: " + str(credits))
     if credits < 1:
         printe("You have run out of credits!")
 
     try:
-        jdat = json.loads(resp.read())
+        if PY3:
+            jdat = json.loads(resp.read().decode('utf8'))
+        else:
+            jdat = json.loads(resp.read())
+
         if "data" in jdat and "link" in jdat["data"]:
             prints("Successfully uploaded image!")
             if args.clipboard:
@@ -159,17 +174,20 @@ def uploadScreenshot(screenshot):
                 else:
                     printv("Error: xclip is not installed!")
                     printv("Printing link to console...")
-                    print "Link: " + jdat["data"]["link"]
+                    print("Link: " + jdat["data"]["link"])
             else:
-                print "Link: " + jdat["data"]["link"]
+                print("Link: " + jdat["data"]["link"])
     except Exception as e:
+        printv('Exception type: %s' % e.__class__.__name__)
         printv(str(e))
         printe("Error: Couldn't upload image")
+
+
 if __name__ == "__main__":
     if args.image:
         if os.path.exists(args.image):
             try:
-                with open(args.image,"rb") as f:
+                with open(args.image, "rb") as f:
                     data = f.read()
             except IOError:
                 printe("Error: Couldn't open file")
